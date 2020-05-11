@@ -65,10 +65,6 @@ def edit_user_details(user_id):
 
     user = User.query.get(user_id)
 
-    print('request form', request.form)
-    print('request type', type(request.form))
-    print('request', request.get_json())
-
     first_name = request.form['first_name']
     last_name = request.form['last_name']
     image_url = request.form['image_url']

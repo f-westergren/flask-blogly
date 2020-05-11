@@ -44,12 +44,20 @@ class UserTestCase(TestCase):
 			self.assertEqual(resp.status_code, 200)
 			self.assertIn('www.image.com', html)
 	
-	def test_edit_user_details(self):
+	def test_delete_user(self):
 		with app.test_client() as client:
 			resp = client.post(f'/users/{self.user_id}/delete')
 			user = User.query.get(self.user_id)
 
 			self.assertFalse(user)
+	
+	def test_edit_user_details(self):
+		with app.test_client() as client:
+			resp = client.post(f'/users/{self.user_id}/edit', 
+				data={'first_name': 'Gustav'})
+			
+			user = User.query.get(self.user_id)
+			self.assertEqual(user.first_name, 'Gustav')
 
 
     
