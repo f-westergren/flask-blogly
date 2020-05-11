@@ -1,0 +1,16 @@
+{% extends "base.html" %}
+{% block title %}User Detail{% endblock %}
+{% block content %}
+
+  <div class='col-2'>
+    <img src="{{user.image_url}}" class="img-fluid rounded" alt="profile photo" />
+  </div>
+  <div class='col-4'>
+    <h1>{{user.first_name}} {{user.last_name}}</h1>
+    <form action='/users/{{user.id}}/delete' method="POST">
+      <button type="submit" class="btn btn-danger float-left mr-1">Delete</button>
+    </form>
+    <a href='/users/{{user.id}}/edit'><button class="btn btn-primary float-left">Edit</button></a>
+  </div>
+
+{% endblock %}

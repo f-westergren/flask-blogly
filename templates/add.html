@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Add User{% endblock %}
+{% block content %}
+<div class=col-4>
+<form action='/users/new' method='POST'>
+  <div class="form-group">
+    <label for="first_name">First Name</label>
+    <input type="text" class="form-control" name="first_name" id="first_name" 
+      aria-describedby="textHelp" placeholder="Enter a first name" required>
+  </div>
+  <div class="form-group">
+    <label for="last_name">Last Name</label>
+    <input type="text" class="form-control" name="last_name" id="last_name" placeholder="Enter a last name" required>
+  </div>
+  <div class="form-group">
+    <label for="image_url">Image URL</label>
+    <input type="text" class="form-control" name="image_url" id="image_url" placeholder="Provide an image for this user">
+  </div>
+  <button type="submit" class="btn btn-success float-right ml-1">Submit</button>
+</form>
+<a href='/users'><button class="btn btn-outline-success float-right ">Cancel</button></a>
+</div>
+{% endblock %}
