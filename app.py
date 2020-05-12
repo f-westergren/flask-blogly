@@ -22,7 +22,7 @@ def home_page():
 @app.route('/users')
 def user_list():
     """Shows list of users in db"""
-    users = User.query.order_by(User.full_name).all()
+    users = User.query.all()
     return render_template('index.html', users=users)
 
 @app.route('/users/new')
