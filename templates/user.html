@@ -6,11 +6,13 @@
     <img src="{{user.image_url}}" class="img-fluid rounded" alt="profile photo" />
   </div>
   <div class='col-4'>
-    <h1>{{user.first_name}} {{user.last_name}}</h1>
+    <h1>{{user.full_name()}}</h1>
     <form action='/users/{{user.id}}/delete' method="POST">
       <button type="submit" class="btn btn-danger float-left mr-1">Delete</button>
     </form>
-    <a href='/users/{{user.id}}/edit'><button class="btn btn-primary float-left">Edit</button></a>
+
+    <a href='/users/{{user.id}}/edit'><button class="btn btn-primary float-left mr-1">Edit</button></a>
+    <a href='/users'><button class="btn btn-outline-primary">Cancel</button></a>
   </div>
 
 {% endblock %}

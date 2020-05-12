@@ -22,7 +22,7 @@ def home_page():
 @app.route('/users')
 def user_list():
     """Shows list of users in db"""
-    users = User.query.all()
+    users = User.query.order_by(User.full_name).all()
     return render_template('index.html', users=users)
 
 @app.route('/users/new')
@@ -34,9 +34,9 @@ def show_add_user():
 def add_user():
     """Add a user"""
 
-    first_name = request.form['first_name']
-    last_name = request.form['last_name']
-    image_url = request.form['image_url']
+    first_name = request.form.get('first_name')
+    last_name = request.form.get('last_name')
+    image_url = request.form.get('image_url', None)
 
     user = User(first_name=first_name, last_name=last_name, image_url=image_url)
 

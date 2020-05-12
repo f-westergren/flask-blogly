@@ -54,10 +54,12 @@ class UserTestCase(TestCase):
 	def test_edit_user_details(self):
 		with app.test_client() as client:
 			resp = client.post(f'/users/{self.user_id}/edit', 
-				data={'first_name': 'Gustav'})
+				data={'first_name': 'Gustav', 'last_name': 'Vasa', 'image_url': 'www.photos.com'})
 			
 			user = User.query.get(self.user_id)
 			self.assertEqual(user.first_name, 'Gustav')
+			self.assertEqual(user.last_name, 'Vasa')
+			self.assertEqual(user.image_url,'www.photos.com')
 
 
     
