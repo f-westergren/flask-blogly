@@ -1,7 +1,7 @@
 from unittest import TestCase
 
 from app import app
-from models import db, User
+from models import db, User, Post
 
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly_test'
 app.config['SQLALCHEMY_ECHO'] = False
@@ -21,8 +21,11 @@ class UserTestCase(TestCase):
 
 		user = User(first_name='Folke', last_name='Filbyte', image_url='www.image.com')
 		db.session.add(user)
+		post = Post(title='A title', content='Great stuff', author_id=user)	
+		db.session.add(post)	
 		db.session.commit()
-
+		print(Post.query.all())
+		
 		self.user_id = user.id
 		
 	def tearDown(self):
@@ -42,6 +45,7 @@ class UserTestCase(TestCase):
 			html = resp.get_data(as_text=True)
 
 			self.assertEqual(resp.status_code, 200)
+			self.assertIn('A title', html)
 			self.assertIn('www.image.com', html)
 	
 	def test_delete_user(self):
@@ -60,6 +64,3 @@ class UserTestCase(TestCase):
 			self.assertEqual(user.first_name, 'Gustav')
 			self.assertEqual(user.last_name, 'Vasa')
 			self.assertEqual(user.image_url,'www.photos.com')
-
-
-    

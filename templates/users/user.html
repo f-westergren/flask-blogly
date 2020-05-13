@@ -1,0 +1,39 @@
+{% extends "base.html" %}
+{% block title %}User Detail{% endblock %}
+{% block content %}
+
+  <div class='col-2'>
+    <img src="{{user.image_url}}" class="img-fluid rounded" alt="profile photo" />
+  </div>
+  <div class='col-4'>
+    <h1>{{user.full_name}}</h1>
+    <form action='/users/{{user.id}}/delete' method="POST">
+      <button type="submit" class="btn btn-danger float-left mr-1">Delete</button>
+    </form>
+
+    <a href='/users/{{user.id}}/edit'><button class="btn btn-primary float-left mr-1">Edit</button></a>
+    <a href='/users'><button class="btn btn-outline-primary">Cancel</button></a>
+    <h2 class="mt-3">Posts</h2>
+    <ul>
+      {% for post in posts %}
+        <li><a href='/posts/{{post.id}}'>{{post.title}}</a></li>
+      {% endfor %}
+    </ul>
+    <a href='/users/{{user.id}}/posts/new'><button class="btn btn-primary float-left mr-1">Add Post</button></a>
+  </div>
+
+{% endblock %}
+
+
+
+
+<!-- 
+Which is better? 
+
+<form action='/users/{{user.id}}/delete' method="POST">
+  <button type="submit" class="btn btn-danger float-left mr-1">Delete</button>
+</form>
+
+or 
+
+<a href='/posts/{{post.id}}/delete'><button class="btn btn-danger float-left ml-1">Delete</button></a> -->

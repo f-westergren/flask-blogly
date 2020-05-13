@@ -2,7 +2,7 @@
 
 from flask import Flask, render_template, redirect, request
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db, User
+from models import db, connect_db, User, Post
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly'
@@ -27,7 +27,7 @@ def user_list():
 
 @app.route('/users/new')
 def show_add_user():
-    return render_template('add.html')
+    return render_template('users/add.html')
 
 
 @app.route('/users/new', methods=['POST'])
@@ -49,7 +49,8 @@ def show_user_details(user_id):
     """Show details about individual users"""
 
     user = User.query.get_or_404(user_id)
-    return render_template('user.html', user=user)
+    posts = Post.query.filter(Post.author_id == user_id).all()
+    return render_template('/users/user.html', user=user, posts=posts)
 
 @app.route('/users/<int:user_id>/edit')
 def show_edit_user_details(user_id):
@@ -57,7 +58,7 @@ def show_edit_user_details(user_id):
 
     user = User.query.get_or_404(user_id)
 
-    return render_template('edit.html', user=user)
+    return render_template('/users/edit.html', user=user)
 
 @app.route('/users/<int:user_id>/edit', methods=['POST'])
 def edit_user_details(user_id):
@@ -92,3 +93,57 @@ def delete_user(user_id):
     db.session.commit()
 
     return redirect('/users')
+
+@app.route('/users/<int:user_id>/posts/new')
+def show_new_post_form(user_id):
+    """Show new post form"""
+
+    user = User.query.get_or_404(user_id)
+
+    return render_template('posts/new.html', user=user)
+
+@app.route('/users/<int:user_id>/posts/new', methods=['POST'])
+def add_new_post(user_id):
+    """Add a new blog post"""
+
+    title = request.form.get('title')
+    content = request.form.get('content')
+
+    post = Post(title=title, content=content, author_id=user_id)
+    
+    db.session.add(post)
+    db.session.commit()
+
+    return redirect(f'/users/{user_id}')
+
+@app.route('/posts/<int:post_id>')
+def show_post(post_id):
+    """ Show blog post """
+
+    post = Post.query.get_or_404(post_id)
+
+    return render_template('posts/post.html', post=post)
+
+@app.route('/posts/<int:post_id>/edit')
+def show_edit_post(post_id):
+    """Show edit post page"""
+
+    post = Post.query.get_or_404(post_id)
+    print(post.title)
+
+    return render_template('posts/edit.html', post=post)
+
+
+
+# @app.route('/posts/<int:post_id>/edit', methods=['POST'])
+
+@app.route('/posts/<int:post_id>/delete', methods=['POST'])
+def delete_post(post_id):
+    """Delete user"""
+
+    post = Post.query.get_or_404(post_id)
+    
+    db.session.delete(post)
+    db.session.commit()
+
+    return redirect(f'/users')
