@@ -23,6 +23,7 @@ def home_page():
 def user_list():
     """Shows list of users in db"""
     users = User.query.all()
+    posts = Post.query.all()
     return render_template('index.html', users=users)
 
 @app.route('/users/new')
