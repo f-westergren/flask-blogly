@@ -3,8 +3,13 @@
 {% block content %}
 <div class=col-5>
   <h1 class="mb-4">{{post.title}}</h1>
-  <p class="mb-4">{{post.content}}</p>
-  <footer class="font-weight-light font-italic">{{post.author.full_name}}</footer>
+  <p>{{post.content}}</p>
+  <footer class="font-weight-light font-italic mb-2">{{post.author.full_name}}</footer>
+  <p class="mb-4 font-weight-bold">Tags:
+    {% for tag in tags %}
+      <a class="badge badge-primary font-italic" href='/tags/{{tag.tag_id}}'>{{tag.tag.name}}</a>
+    {% endfor %}
+  </p>
   <a href='/users/{{post.author.id}}'><button class="btn btn-outline-primary float-left ">Cancel</button></a>
   <a href='/posts/{{post.id}}/edit'><button class="btn btn-primary float-left ml-1">Edit</button></a>
   <form action='/posts/{{post.id}}/delete' method="POST">

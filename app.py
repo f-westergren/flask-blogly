@@ -2,12 +2,12 @@
 
 from flask import Flask, render_template, redirect, request
 from flask_debugtoolbar import DebugToolbarExtension
-from models import db, connect_db, User, Post
+from models import db, connect_db, User, Post, PostTag, Tag
 
 app = Flask(__name__)
 app.config['SQLALCHEMY_DATABASE_URI'] = 'postgresql:///blogly'
 app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
-# app.config['SQLALCHEMY_ECHO'] = True
+app.config['SQLALCHEMY_ECHO'] = True
 app.config['SECRET_KEY'] = 'folke'
 app.config['DEBUG_TB_INTERCEPT_REDIRECTS'] = False
 debug = DebugToolbarExtension(app)
@@ -100,8 +100,9 @@ def show_new_post_form(user_id):
     """Show new post form"""
 
     user = User.query.get_or_404(user_id)
+    tags = Tag.query.all()
 
-    return render_template('posts/new.html', user=user)
+    return render_template('posts/new.html', user=user, tags=tags)
 
 @app.route('/users/<int:user_id>/posts/new', methods=['POST'])
 def add_new_post(user_id):
@@ -109,8 +110,13 @@ def add_new_post(user_id):
 
     title = request.form.get('title')
     content = request.form.get('content')
+    tags = request.form.getlist('tags')
 
-    post = Post(title=title, content=content, author_id=user_id)
+    # Create a list with PostTags from selected tags
+
+    tag_list = [PostTag(tag_id=tag_id) for tag_id in tags]
+
+    post = Post(title=title, content=content, author_id=user_id, tags=tag_list)
     
     db.session.add(post)
     db.session.commit()
@@ -122,29 +128,91 @@ def show_post(post_id):
     """ Show blog post """
 
     post = Post.query.get_or_404(post_id)
+    tags = post.tags
 
-    return render_template('posts/post.html', post=post)
+    return render_template('posts/post.html', post=post, tags=tags)
 
-@app.route('/posts/<int:post_id>/edit')
-def show_edit_post(post_id):
-    """Show edit post page"""
+@app.route('/posts/<int:post_id>/edit', methods=['POST', 'GET'])
+def edit_post(post_id):
 
     post = Post.query.get_or_404(post_id)
-    print(post.title)
+    tags = Tag.query.all()
+    tag_ids = post.tag_ids
 
-    return render_template('posts/edit.html', post=post)
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        tags = request.form.getlist('tags')
+        
+        tag_list = [PostTag(post_id=post_id, tag_id=tag_id) for tag_id in tags]
 
+        post.title = title
+        post.content = content
+        PostTag.query.filter_by(post_id=post_id).delete()
+        db.session.commit()
+        post.tags = tag_list
+        db.session.commit()
 
-
-# @app.route('/posts/<int:post_id>/edit', methods=['POST'])
+        return redirect(f'/posts/{post_id}')
+    else: 
+        return render_template('/posts/edit.html', post=post, tags=tags, tag_ids=tag_ids)
 
 @app.route('/posts/<int:post_id>/delete', methods=['POST'])
 def delete_post(post_id):
     """Delete user"""
 
     post = Post.query.get_or_404(post_id)
+    print(post_id)
     
+    PostTag.query.filter_by(post_id=post_id).delete()
     db.session.delete(post)
     db.session.commit()
 
     return redirect(f'/users')
+
+@app.route('/tags')
+def show_tags():
+    """Show tags"""
+
+    tags = Tag.query.all()
+
+    return render_template('tags/tags.html', tags=tags)
+
+@app.route('/tags/<int:tag_id>')
+def show_tag(tag_id):
+    """Show specific tag and its posts"""
+
+    tag = Tag.query.get_or_404(tag_id)
+    posts = tag.posts
+
+    return render_template('tags/tag.html', tag=tag, posts=posts)
+
+@app.route('/tags/new', methods=['POST', 'GET'])
+def add_tag():
+    """Add a tag"""
+    if request.method == 'POST':
+        name = request.form.get('name')
+        print('tag name', name)
+        tag = Tag(name=name)
+
+        db.session.add(tag)
+        db.session.commit()
+
+        return redirect('/tags')
+
+    return render_template('tags/new.html')
+
+@app.route('/tags/<int:tag_id>/edit', methods=['POST', 'GET'])
+def edit_tag(tag_id):
+    tag = Tag.query.get(tag_id)
+
+    if request.method == 'POST':
+        name = request.form.get('name')
+
+        tag.name = name
+        db.session.commit()
+        print('YES!')
+
+        return redirect(f'/tags/{tag_id}')
+
+    return render_template('tags/edit.html', tag=tag)

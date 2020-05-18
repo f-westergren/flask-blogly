@@ -3,7 +3,7 @@
 {% block content %}
 <div class=col-5>
   <h1 class="mb-4">Edit post</h1>
-  <form action='/users/{{post.author.id}}/posts/new' method='POST'>
+  <form action='/posts/{{post.id}}/edit' method='POST'>
     <div class="form-group row">
       <label for="title" class="col-sm-2 col-form-label">Title</label>
       <div class="col-sm-10">
@@ -16,7 +16,14 @@
         <textarea class="form-control" id="content" name="content" rows="3">{{post.content}}</textarea>
       </div>
     </div>
-    <button type="submit" class="btn btn-success float-right ml-1">Edit</button>
+    {% for tag in tags %}
+      <div class="form-check">
+        <input class="form-check-input" type="checkbox" id="{{tag.tag_id}}" name="tags" value="{{tag.id}}" 
+        {% for id in tag_ids %} {% if id == tag.id %} checked {% endif %} {% endfor %}>
+        <label class="form-check-label" for="tags">{{tag.name}}</label>  
+      </div>
+  {% endfor %}
+    <button type="submit" class="btn btn-success float-right ml-1">Save</button>
   </form>
   <a href='/users/{{post.author.id}}'><button class="btn btn-outline-info float-right ">Cancel</button></a>
 </div>

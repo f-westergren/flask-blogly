@@ -17,7 +17,6 @@ class UserTestCase(TestCase):
 	"""Tests for users"""
 
 	def setUp(self):
-		print('Setting up')
 		Post.query.delete()
 		User.query.delete()
 		
@@ -28,14 +27,9 @@ class UserTestCase(TestCase):
 		db.session.add(post)	
 		db.session.commit()
 		
-		self.user_id = user.id
-		
-	def tearDown(self):
-		print('Tearing down')
-		db.session.rollback()
+		self.user_id = user.id	
 	
 	def test_user_list(self):
-		print('Running test_user_list test')
 		with app.test_client() as client:
 			resp = client.get('/', follow_redirects=True)
 			html = resp.get_data(as_text=True)
@@ -44,7 +38,6 @@ class UserTestCase(TestCase):
 			self.assertIn('Filbyte', html)
 
 	def test_user_details(self):
-		print('Running test_user_details test')
 		with app.test_client() as client:
 			resp = client.get(f'/users/{self.user_id}')
 			html = resp.get_data(as_text=True)
@@ -53,16 +46,17 @@ class UserTestCase(TestCase):
 			self.assertIn('A title', html)
 			self.assertIn('www.image.com', html)
 	
-	def test_delete_user(self):
-		print('Running test_delete_user test')
+	def test_add_user(self):
 		with app.test_client() as client:
-			resp = client.post(f'/users/{self.user_id}/delete')
-			user = User.query.get(self.user_id)
+			resp = client.post('/users/new', 
+				data={'first_name': 'New', 'last_name': 'User', 'image_url': 'www.newuser.com'})
+				
+			user = User.query.filter_by(last_name = 'User').first()
 
-			self.assertFalse(user)			
-	
+			self.assertEqual(user.first_name, 'New')
+			self.assertEqual(user.image_url,'www.newuser.com')
+
 	def test_edit_user_details(self):
-		print('Running test_edit_user_details test')
 		with app.test_client() as client:
 			resp = client.post(f'/users/{self.user_id}/edit', 
 				data={'first_name': 'Gustav', 'last_name': 'Vasa', 'image_url': 'www.photos.com'})
@@ -70,5 +64,41 @@ class UserTestCase(TestCase):
 			user = User.query.get(self.user_id)
 			self.assertEqual(user.first_name, 'Gustav')
 			self.assertEqual(user.last_name, 'Vasa')
-			self.assertEqual(user.image_url,'www.photos.com')
+			self.assertEqual(user.image_url,'www.photos.com')	
+	
+	def test_delete_user(self):
+		with app.test_client() as client:
+			resp = client.post(f'/users/{self.user_id}/delete')
+			user = User.query.get(self.user_id)
+
+			self.assertFalse(user)			
+	
+	def test_show_new_post_form(self):
+		with app.test_client() as client:
+			resp = client.get(f'/users/{self.user_id}/posts/new')
+			html = resp.get_data(as_text=True)
+			user = User.query.get(self.user_id)
+
+			self.assertEqual(resp.status_code, 200)
+			self.assertIn(f'Add Post for {user.full_name}', html)
+	
+	def test_add_new_post(self):
+		with app.test_client() as client:
+			resp = client.post(f'/users/{self.user_id}/posts/new', 
+				data={'title': 'Test title', 'content': 'Test stuff', 'author_id': self.user_id})
+			
+			user = User.query.get(self.user_id)
+			post = Post.query.filter_by(title = 'Test title').first()
+
+			# Redirect to check if post got posted.
+			
+			html = client.get(f'/posts/{post.id}').get_data(as_text=True)
+
+			self.assertIn('Test title', html)
+			self.assertIn('Test stuff', html)
+			self.assertIn(user.full_name, html)
+
+
+
+# Should you put user = User.query.get(self.user_id) in setUp? It's not used every time but it would save repeating code.
 
